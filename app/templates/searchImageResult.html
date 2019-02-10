@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Images{% endblock %}
+
+
+{% block content %}
+
+<body>
+<h4>Search Result for {{ object }}</h4>
+<li>
+
+    {% for image in photo %}
+    <p><img src="data:;base64,{{ image }}" style="width:400px;height:400px;"></p>
+    {% endfor %}
+
+    {% for image in newphoto %}
+    <p><img src="data:;base64,{{ image }}" style="width:400px;height:400px;"></p>
+    {% endfor %}
+
+
+</li>
+
+</body>
+
+
+
+
+{% endblock %}

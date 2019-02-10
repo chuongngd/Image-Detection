@@ -1,0 +1,64 @@
+
+{% extends 'layout.html' %}
+{% block title %} Home {% endblock %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>  
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>  
+    <link rel="stylesheet" type="text/css" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+{% if session['name'] %}
+
+Welcome {{ session['name'] }}
+
+{% else %}
+
+Not login
+{% endif %}
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form action="/input/" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    {{ message }}
+                    <br>
+                    <label>Input Picture:</label>
+					<div class="form-group">
+                        <input type="file" class="form-control" name = "image" id = "image" accept="image/*">
+					</div>
+                    <div class="form-group">
+                        <input type="submit" name="insert" value = "insert" value = "Insert">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+<script>  
+ $(document).ready(function(){  
+      $('#insert').click(function(){  
+           var image_name = $('#image').val();  
+           if(image_name == '')  
+           {  
+                alert("Please Select Image");  
+                return false;  
+           }  
+           else  
+           {  
+                var extension = $('#image').val().split('.').pop().toLowerCase();  
+                if(jQuery.inArray(extension, ['gif','png','jpg','jpeg']) == -1)  
+                {  
+                     alert('Invalid Image File');  
+                     $('#image').val('');  
+                     return false;  
+                }  
+           }  
+      });  
+ });  
+ </script>  
+{% endblock %}

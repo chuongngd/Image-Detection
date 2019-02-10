@@ -1,0 +1,27 @@
+
+{% extends 'layout.html' %}
+{% block title %} Search Image {% endblock %}
+
+{% block content %}
+<body>
+<div class = "container">
+    {% if session['name'] %}
+    <h2>Search Image Database</h2>
+
+    {% from "_formhelpers.html" import render_field %}
+    <form method = "POST" action = "/searchImage/">
+        <dl>
+                {{ render_field(form.search) }}
+        </dl>
+        <div class="form-group">
+
+            <button class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    {% else %}
+
+    Not login. Login to search image
+    {% endif %}
+</div>
+</body>
+{% endblock %}

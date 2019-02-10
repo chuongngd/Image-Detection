@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}Images{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<body>
+<h4>Result</h4>
+<li>
+
+
+    <p><img src="data:;base64,{{ databaseImage }}" style="width:400px;height:400px;"></p>
+    <p><img src="data:;base64,{{ newdatabaseImage }}" style="width:400px;height:400px;"></p>
+
+        {{ objects }}
+
+
+
+
+</li>
+
+</body>
+
+
+
+
+{% endblock %}

@@ -1,4 +1,4 @@
-This is the Object Detection API I refer from TensorFlow Object Detection API project and have some modifications to adjust to my projec.
+This is the Object Detection API I refer from TensorFlow Object Detection API project and have some modifications to adjust to my project.
 The code of Object Detection API which I modified and used for my project is the file Object_detection_api_example in object_detection folder.
 The Tensorflow Object Detection API object can find at https://github.com/tensorflow/models/tree/master/research/object_detection and is contribute by 
 Jonathan Huang,

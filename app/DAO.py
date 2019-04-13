@@ -2,7 +2,7 @@ from dbconnect import connection
 
 import mysql.connector
 class DAO:
-   
+   #function to login 
     def login(username, password):
         try:
             c, conn = connection()
@@ -19,8 +19,8 @@ class DAO:
         except mysql.connector.Error as error:
             conn.rollback()
             print("Failed searching username and password in database {}".format(error))
-    
-    def checkUsername(username):
+    #function to check if a username exist in database
+    def check_username(username):
         try:
             c,conn = connection()
             c.execute("SELECT * FROM users WHERE username = %s",(username,))
@@ -36,6 +36,7 @@ class DAO:
         except mysql.connector.Error as error:
             conn.rollback()
             print("Failed searching username in database {}".format(error))
+    #funciton to insert new user into database
     def register(username, password, email, firstname, lastname):
         try:
             c,conn = connection()
@@ -50,8 +51,8 @@ class DAO:
             c.close()
             conn.close()
             return True
-        
-    def checkImageName(imagename):
+    #function to check if a image name is in database
+    def check_image_name(imagename):
         try:
             c,conn = connection()
             sql = "SELECT * FROM images WHERE imagename = %s"
@@ -67,7 +68,7 @@ class DAO:
             print("Failed searching data in MySQL table {}".format(error))
     
     #insert into images table value of an image, include imagename, objects under JSON type, photo data under BLOB type
-    def insertImage(filename, data, objects):
+    def insert_image(filename, data, objects):
         try:
             c,conn = connection()
             sql = "INSERT INTO images (imagename, photo,objects) VALUES (%s, %s, %s)"
@@ -80,7 +81,21 @@ class DAO:
             conn.rollback()
             print("Failed searching data in MySQL table {}".format(error))
             
-    def updateImage(data,filename):
+    def insert_video_capture(filename, data, objects, timecapture):
+        try:
+            c,conn = connection()
+            sql = "INSERT INTO videocapture (imagename, photo, objects, timecapture) VALUES (%s, %s, %s, %s)"
+            val = (filename,data,objects,timecapture)
+            c.execute(sql,val)
+            conn.commit()
+            c.close()
+            conn.close()
+        except mysql.connector.Error as error :
+            conn.rollback()
+            print("Failed searching data in MySQL table {}".format(error))
+    
+    #function to update images table by set newphoto field with values of detected image 
+    def update_image(data,filename):
         try:
             c,conn = connection()
             sql = "UPDATE images SET newphoto = %s WHERE imagename = %s"
@@ -93,7 +108,7 @@ class DAO:
             conn.rollback()
             print("Failed searching data in MySQL table {}".format(error))
     #insert into objects table all objects' properties of an image
-    def insertObjects(imagename,objectname,score,x,y,width,height):
+    def insert_objects(imagename,objectname,score,x,y,width,height):
         try:
             c,conn = connection()
             sql = "INSERT INTO objects (imagename,class_name,score,x,y,width,height) VALUES (%s,%s,%s,%s,%s,%s,%s)"
@@ -106,7 +121,8 @@ class DAO:
         finally:
             c.close()
             conn.close()
-    def retrievePhoto(imagename):
+    #function retrieve an original photo from images table by image name
+    def retrieve_photo(imagename):
         try:
             c,conn = connection()
             sql = "SELECT photo from images where imagename = %s"
@@ -122,8 +138,8 @@ class DAO:
         except mysql.connector.Error as error :
             conn.rollback()
             print("Failed searching data int MySQL table {}".format(error))
-            
-    def retrievePhotoDetection(imagename):
+     #function retrieve a photo after detection from images table by image name     
+    def retrieve_photo_detection(imagename):
         try:
             c,conn = connection()
             sql = "SELECT newphoto from images where imagename = %s"
@@ -140,7 +156,8 @@ class DAO:
             conn.rollback()
             print("Failed searching data int MySQL table {}".format(error))
             
-    def searchImageNameFromObject(name):
+    #function search image name from objects table by name of an object
+    def search_image_name_from_object(name):
         try:
             c,conn = connection()
             sql = "SELECT imagename from objects WHERE class_name = %s"
@@ -153,6 +170,43 @@ class DAO:
                 return record
             else:
                 return 0
+        except mysql.connector.Error as error:
+            conn.rollback()
+            print("Failed searching data int MySQL table {}".format(error))
+    
+    #function search image with a object from video capture. 
+    # it return a list of images with its capture time
+    def search_image_from_videocapture(objectname):
+        try:
+            c,conn = connection()
+            sql = "SELECT * from videocapture"
+            #val = (name,)
+            c.execute(sql,)
+            records = c.fetchall()
+            list_objects = []
+            #search_result = []
+            list_image = []
+            time_capture = []
+            list_image_result = []
+            time_capture_result = []
+            list_object_result = []
+            for row in records:
+                list_objects.append(row[3])
+                list_image.append(row[2])
+                time_capture.append(row[4])
+             
+            for index in range(len(list_objects)):
+                if  objectname in list_objects[index]:
+                    list_image_result.append(list_image[index])
+                    list_object_result.append(list_objects[index])
+                    time_capture_result.append(time_capture[index])
+            if len(list_object_result) != 0:
+                result = [list_image_result,time_capture_result]
+                return result
+            else:
+                return 0
+            c.close()
+            conn.close()
         except mysql.connector.Error as error:
             conn.rollback()
             print("Failed searching data int MySQL table {}".format(error))

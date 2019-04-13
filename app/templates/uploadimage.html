@@ -8,23 +8,53 @@
 {% block content %}
 
 <body>
-<h4>Result</h4>
+{% if list_objects_string == ''%}
+<h4> There is not objects in the image can detect due to the program</h4>
+{% else %}
+<h4> Detection Result</h4>
+{%endif%}
 <li>
-
 
     <p><img src="data:;base64,{{ databaseImage }}" style="width:400px;height:400px;"></p>
     <p><img src="data:;base64,{{ newdatabaseImage }}" style="width:400px;height:400px;"></p>
+Objects in the image:
+    <br>
 
-        {{ objects }}
+{% for object in list_objects %}
 
+        <input type = "hidden" name = "object" id = "object" value = "{{ object }}" > <br>
+        <button type = "button" class="btn btn-primary migrate" image_name = "{{ image_name}}"
+                name = "{{ object }}" list_objects = "{{list_objects}}" >{{ object }}</button>
+    <br>
 
+    {% endfor %}
 
+    <script>
+    $(".btn.migrate").on("click",function(){
+    var objects = ($(this).attr("list_objects"));
+    var name = ($(this).attr("name"));
+    var image_name = ($(this).attr("image_name"));
+    var data = JSON.stringify({"image_name":image_name,"name":name, "objects":objects});
+    $.ajax({
+        url: "/viewobject/",
+        method: "POST",
+        contentType: "application/json",
+        data: data,
+        processData: false,
+        contentLength: data.length,
+        success: function(data) {
+        document.body.innerHTML = data;
+        console.log(data)
+        },
+        error: function(data){
+        alert("error");
+        }
+    });
+    });
 
+    </script>
 </li>
 
 </body>
-
-
-
 
 {% endblock %}

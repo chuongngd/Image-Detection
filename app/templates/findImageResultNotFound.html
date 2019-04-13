@@ -1,0 +1,90 @@
+
+{% extends 'layout.html' %}
+{% block title %} Home {% endblock %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            {% if session['name'] %}
+
+            Welcome {{ session['name'] }}
+            <h4> There are not image contains {{ objectname }} </h4>
+
+
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form  action="/findimageresult/" method="POST" id = "form-input" enctype="multipart/form-data">
+                <div class="form-group">
+                    {{ message }}
+                    <br>
+                    <label>Input Picture:</label>
+                    <div class="form-group">
+                        <input type="file" class="form-control" name = "image" id = "image" accept="image/*" multiple>
+                        <input type="text"  name="objectname" id = "objectname">
+                    </div>
+
+                </div>
+                <div class="form-group">
+                    <button type = "submit" name="insert" form = "form-input" id = "insert"  class="btn btn-primary migrate">Detect</button>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+
+</div>
+<script>
+    $(document).ready(function(){
+        $("#form_input").submit(function(e){
+            var formData = new FormData($("#form_input")[0]);
+            $.ajax({
+                xhr: function(){
+                    var xhr = window.XMLHttpRequest();
+                },
+                url: "/findimageresult/",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (resp) {
+                    console.log(resp);
+                }
+            });
+        });
+        $("#insert").on("click",function(e){
+
+            //var formData = new FormData($('form')[0]);
+            var image_name = $('#image').val();
+            var object_name = $('#objectname').val();
+            if(image_name == ''||object_name=='')
+            {
+                alert("Please Select Image or input search object");
+                return false;
+            }
+            else
+            {
+                var extension = $('#image').val().split('.').pop().toLowerCase();
+                if(jQuery.inArray(extension, ['png','jpg','jpeg']) == -1)
+                {
+                    alert('Invalid Image File');
+                    $('#image').val('');
+                    return false;
+                }
+            }
+        });
+
+    });
+
+</script>
+{% else %}
+
+Not login
+{% endif %}
+
+{% endblock %}

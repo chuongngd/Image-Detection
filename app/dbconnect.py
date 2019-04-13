@@ -1,6 +1,7 @@
 
 import mysql.connector
 
+#function to connect database
 def connection():
 	try:
 		conn = mysql.connector.connect(user='root',password='root',host='127.0.0.1',db='flask',connect_timeout=1000)

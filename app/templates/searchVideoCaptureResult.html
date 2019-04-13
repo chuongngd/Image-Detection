@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Images{% endblock %}
+
+
+{% block content %}
+
+
+<h4>Video capture result for {{ search_object }}</h4>
+
+    {% for i in range(length) %}
+<h4> Time capture: </h4>
+{{ time[i] }}
+    <p><img src="data:;base64,{{ photo[i] }}" style="width:400px;height:400px;"></p>
+
+<br>
+
+    {% endfor %}
+
+{% endblock %}

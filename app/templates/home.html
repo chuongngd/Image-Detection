@@ -16,7 +16,7 @@ Welcome {{ session['name'] }}
     </div>
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <form action="/upload/" method="POST" id = "form-input" enctype="multipart/form-data">
+            <form  action="/upload/" method="POST" id = "form-input" enctype="multipart/form-data">
                 <div class="form-group">
                     {{ message }}
                     <br>
@@ -26,36 +26,59 @@ Welcome {{ session['name'] }}
 					</div>
                     
                 </div>
+                <div class="form-group">
+                    <button type = "submit" name="insert" form = "form-input" id = "insert"  class="btn btn-primary migrate">Detect</button>
+
+                </div>
             </form>
-            <div class="form-group">
-                        <input type="submit" name="insert" form = "form-input" id = "insert" value = "Detect">
-                    </div>
+
         </div>
     </div>
 
+
 </div>
-<script>  
- $(document).ready(function(){  
-      $("insert").click(function(){  
-           var image_name = $('#image').val();  
-           if(image_name == '')  
-           {  
-                alert("Please Select Image");  
-                return false;  
-           }  
-           else  
-           {  
-                var extension = $('#image').val().split('.').pop().toLowerCase();  
+<script>
+    $(document).ready(function(){
+        $("#form_input").submit(function(e){
+            var formData = new FormData($("#form_input")[0]);
+            $.ajax({
+                xhr: function(){
+                   var xhr = window.XMLHttpRequest();
+                },
+                url: "/upload/",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (resp) {
+                    console.log(resp);
+                }
+            });
+        });
+        $("#insert").on("click",function(e){
+
+            //var formData = new FormData($('form')[0]);
+            var image_name = $('#image').val();
+            if(image_name == '')
+            {
+                alert("Please Select Image");
+                return false;
+            }
+            else
+            {
+                var extension = $('#image').val().split('.').pop().toLowerCase();
                 if(jQuery.inArray(extension, ['png','jpg','jpeg']) == -1)
-                {  
-                     alert('Invalid Image File');  
-                     $('#image').val('');  
-                     return false;  
-                }  
-           }  
-      });  
- });  
- </script>
+                {
+                    alert('Invalid Image File');
+                    $('#image').val('');
+                    return false;
+                }
+            }
+        });
+
+    });
+
+</script>
 {% else %}
 
 Not login

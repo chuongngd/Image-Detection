@@ -20,7 +20,7 @@ from io import StringIO
 from matplotlib import pyplot as plt
 from PIL import Image
 from matplotlib import cm
-
+from dbconnect import connection
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
 from utils import ops as utils_ops
@@ -28,7 +28,6 @@ from utils import ops as utils_ops
 from utils import label_map_util
 
 from utils import visualization_utils as vis_util
-
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
   raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
@@ -42,13 +41,10 @@ DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
-
-# List of the strings that is used to add correct label for each box.
-#PATH_TO_LABELS = os.path.join('data', 'mscoco_label_map.pbtxt')
+PHOTOS_FOLDER = os.path.join('images/')
 PATH_TO_LABELS = 'C:/Users/chuon/application1/env/app/object_detection/object_detection/data/mscoco_label_map.pbtxt'
 
 NUM_CLASSES = 90
-
 
 # Download Model
 opener = urllib.request.URLopener()
@@ -81,10 +77,6 @@ def load_image_into_numpy_array(image):
   return np.array(image.getdata()).reshape(
       (im_height, im_width, 3)).astype(np.uint8)
   
-#PATH_TO_TEST_IMAGES_DIR = 'test_images' #cwh
-#TEST_IMAGE_PATHS = [ os.path.join(PATH_TO_TEST_IMAGES_DIR, 'image{}.jpg'.format(i)) for i in range(1, 3) ]
-
-
 with detection_graph.as_default():
   with tf.Session(graph=detection_graph) as sess:
     # Definite input and output Tensors for detection_graph
@@ -120,26 +112,30 @@ def get_objects(image):
     image_np = load_image_into_numpy_array(image)
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
-    # Actual detection.
+    # Actual detection. The tensorflow api runs the detection 
+    # It return the value of objects(classes), scores(accuracy), boxes (location), num(number of object) 
     (boxes, scores, classes, num) = sess.run(
         [detection_boxes, detection_scores, detection_classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
-
+    
+    #convert the classes, scores and boxes dimession to numpy array
     classes = np.squeeze(classes).astype(np.int64)
     scores = np.squeeze(scores)
     boxes = np.squeeze(boxes)
 
     obj_above_thresh = sum(n > threshold for n in scores)
-
-    outputJson = []
+    
 
     # Add another json data field to the output
     item = {}
     item["version"] = "0.0.1"
     item["numObjects"] = obj_above_thresh
     item["threshold"] = threshold
+    outputJson = []
     outputJson.append(item)
-    
+    #convert detection result to json format 
+    big_json={}
+    big_json["array"] = outputJson
     #put object from actual detection result into json output
     for c in range(0, len(classes)):
         class_name = category_index[classes[c]]['name']
@@ -156,12 +152,14 @@ def get_objects(image):
                                    float(scores[c]),float(boxes[c][0]),
                                    float(boxes[c][2]),float(boxes[c][3]))
             outputJson.append(itemJson)
-            big_json={}
+            
             big_json["array"] = outputJson
       
     sess.close()
     return big_json
 
+#function use the tensorflow graph to detect an image, it return an output dictionry 
+#which contains the image' objects' attribues
 def run_inference_for_single_image(image, graph):
   with graph.as_default():
     with tf.Session() as sess:
@@ -211,7 +209,7 @@ def run_inference_for_single_image(image, graph):
 IMAGE_SIZE = (12, 8)
 
 #function detect image and draw object box
-def detectImageDraw(image,filename):
+def detect_image_draw(image,filename):
   # the array based representation of the image will be used later in order to prepare the
   # result image with boxes and labels on it.
   image_np = load_image_into_numpy_array(image)
@@ -234,4 +232,124 @@ def detectImageDraw(image,filename):
   output_dir = 'C:/Users/chuon/application1/env/app/images/'
   #save the image into local host
   plt.savefig(output_dir + filename)
+
+#function detect image and draw one object box
+def detect_image_draw_one_object(image,objectName,filename):
+  # the array based representation of the image will be used later in order to prepare the
+  # result image with boxes and labels on it.
+  image_np = load_image_into_numpy_array(image)
+  # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+  
+  # Actual detection.
+  output_dict = run_inference_for_single_image(image_np, detection_graph)
+  # Visualization of the results of a detection.
+  vis_util.draw_single_object(
+      image_np,
+      output_dict['detection_boxes'],
+      output_dict['detection_classes'],
+      output_dict['detection_scores'],
+      category_index,
+      objectName,
+      instance_masks=output_dict.get('detection_masks'),
+      use_normalized_coordinates=True,
+      line_thickness=8)
+  plt.figure(figsize=IMAGE_SIZE)
+  plt.imshow(image_np)
+  output_dir = 'C:/Users/chuon/application1/env/app/images/'
+  filename = objectName + "_" + filename
+  #save the image into local host
+  plt.savefig(output_dir + filename)
+  
+import cv2
+
+#function to get frame of video 
+def get_frame():
+    cap = cv2.VideoCapture(0)
+    ret,image_np = cap.read()
+  # Actual detection.
+    output_dict = run_inference_for_single_image(image_np, detection_graph)
+  # Visualization of the results of a detection.
+    vis_util.visualize_boxes_and_labels_on_image_array(image_np,output_dict['detection_boxes'],output_dict['detection_classes'],output_dict['detection_scores'],
+                                                       category_index,instance_masks=output_dict.get('detection_masks'),
+                                                       use_normalized_coordinates=True,line_thickness=8)
+    ret,jpeg = cv2.imencode('.jpg',image_np)
+    return jpeg.tobytes()
+ 
+#function to detect a video , it get frame by read each video capture, detect objects on the video capture
+# then display the frame by frame to create the video
+def detect_video():
+    ret = True
+    #cap = cv2.VideoCapture(0)
+    while(ret):
+        cap = cv2.VideoCapture(0)
+        ret,image_np = cap.read()
+        output_dict = run_inference_for_single_image(image_np, detection_graph)
+        vis_util.visualize_boxes_and_labels_on_image_array(image_np,output_dict['detection_boxes'],output_dict['detection_classes'],
+                                                           output_dict['detection_scores'],category_index,
+                                                           instance_masks=output_dict.get('detection_masks'),
+                                                           use_normalized_coordinates=True,line_thickness=8)
+        ret,jpeg = cv2.imencode('.jpg',image_np)
+        #frame = get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            cap.release()
+            break
+def is_not_blank(s):
+    return bool(s and s.strip())
+import datetime
+from DAO import DAO
+
+#function to find an object in a video , it get frame by read each video capture, find the object in the video capture
+# draw the object box then display the frame by frame to create the video
+# the function also save the video capture into database each 10 seconds
+def search_video(objectname):
+    ret = True
+    start_time =  datetime.datetime.now()
+    while(ret):
+        cap = cv2.VideoCapture(0)
+        ret,image_np = cap.read()
+        output_dict = run_inference_for_single_image(image_np, detection_graph)
+        vis_util.draw_single_object(image_np,output_dict['detection_boxes'],
+                                    output_dict['detection_classes'],
+                                    output_dict['detection_scores'],
+                                    category_index,
+                                    objectname,
+                                    instance_masks=output_dict.get('detection_masks'),
+                                    use_normalized_coordinates=True,
+                                    line_thickness=8)
+        classes_name = []
+        classes = output_dict['detection_classes']
+        scores = output_dict['detection_scores']
+        threshold = 0.5
+        for c in range(0, len(classes)):
+           if scores[c] >= threshold:
+               classes_name.append(category_index[classes[c]]['name'])
+        current_time = datetime.datetime.now()
+        if(is_not_blank(objectname)==True):
+            if (current_time - start_time).total_seconds() > 10:
+                plt.figure(figsize=IMAGE_SIZE)
+                plt.imshow(image_np)
+                output_dir = PHOTOS_FOLDER
+                filename = current_time.strftime("%H-%M-%S") + "_video_capture.jpg"
+            #save the image into local host
+                plt.savefig(output_dir + filename)
+                if objectname in classes_name:
+                    file_name = 'videocapture_' + objectname + current_time.strftime("%H-%M-%S")
+                    cv2.imwrite(output_dir + file_name + '.jpg',image_np)
+                    with open(os.path.join(PHOTOS_FOLDER,file_name + '.jpg'),'rb') as f:
+                        data= f.read()
+                    #objects = ','.join(map(str,classes_name))
+                    DAO.insert_video_capture(file_name,data,objectname,current_time.strftime("%H-%M-%S"))
+                start_time =  datetime.datetime.now()
+                  
+        #frame = get_frame()
+        ret,jpeg = cv2.imencode('.jpg',image_np)
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            cap.release()
+            break
 

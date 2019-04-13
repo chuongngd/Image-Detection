@@ -26,7 +26,7 @@ from PIL import Image
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
-from object_detection.utils import ops as utils_ops
+from utils import ops as utils_ops
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
   raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
@@ -194,33 +194,34 @@ def run_inference_for_single_image(image, graph):
 import cv2
 cap = cv2.VideoCapture(0)
 #for image_path in TEST_IMAGE_PATHS:
-ret = True
-while(ret):  
+def detectvideo():
+    ret = True
+    while(ret):  
   #image = Image.open(image_path)
   # the array based representation of the image will be used later in order to prepare the
   # result image with boxes and labels on it.
-  ret,image_np = cap.read()
+        ret,image_np = cap.read()
   #image_np = load_image_into_numpy_array(image)
   # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-  image_np_expanded = np.expand_dims(image_np, axis=0)
+        image_np_expanded = np.expand_dims(image_np, axis=0)
   # Actual detection.
-  output_dict = run_inference_for_single_image(image_np, detection_graph)
+        output_dict = run_inference_for_single_image(image_np, detection_graph)
   # Visualization of the results of a detection.
-  vis_util.visualize_boxes_and_labels_on_image_array(
-      image_np,
-      output_dict['detection_boxes'],
-      output_dict['detection_classes'],
-      output_dict['detection_scores'],
-      category_index,
-      instance_masks=output_dict.get('detection_masks'),
-      use_normalized_coordinates=True,
-      line_thickness=8)
+        vis_util.visualize_boxes_and_labels_on_image_array(
+                image_np,
+                output_dict['detection_boxes'],
+                output_dict['detection_classes'],
+                output_dict['detection_scores'],
+                category_index,
+                instance_masks=output_dict.get('detection_masks'),
+                use_normalized_coordinates=True,
+                line_thickness=8)
   #plt.figure(figsize=IMAGE_SIZE)
   #plt.imshow(image_np)
-  cv2.imshow('image',cv2.resize(image_np,(1280,960)))
-  if cv2.waitKey(25) & 0xFF == ord('q'):
-      cv2.destroyAllWindows()
-      cap.release()
-      break
+      cv2.imshow('image',cv2.resize(image_np,(1280,960)))
+      if cv2.waitKey(25) & 0xFF == ord('q'):
+          cv2.destroyAllWindows()
+          cap.release()
+          break
 # -*- coding: utf-8 -*-
 

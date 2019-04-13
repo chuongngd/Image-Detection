@@ -5,31 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% block title %} {% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>  
-     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>  
+	<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet" type="text/css" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-	<script>  
- $(document).ready(function(){  
-      $('#insert').click(function(){  
-           var image_name = $('#image').val();  
-           if(image_name == '')  
-           {  
-                alert("Please Select Image");  
-                return false;  
-           }  
-           else  
-           {  
-                var extension = $('#image').val().split('.').pop().toLowerCase();  
-                if(jQuery.inArray(extension, ['gif','png','jpg','jpeg']) == -1)  
-                {  
-                     alert('Invalid Image File');  
-                     $('#image').val('');  
-                     return false;  
-                }  
-           }  
-      });  
- });  
- </script>
 </head>
 <body>
 <nav class="navbar navbar-default">
@@ -56,12 +34,17 @@
      <a href="/uploadimage">Detect An Image</a>
     </li>
     <li>
-     <a href="#">Show Result</a>
+     <a href="/video">Stream Video Detection</a>
     </li>
     <li>
-     <a href="/searchImage">Search Images</a>
+     <a href="/searchImage">Search Images From Database</a>
     </li>
-
+            <li>
+                <a href="/searchVideoCapture">Search Video Capture</a>
+            </li>
+            <li>
+                <a href="/findimage">Classify Images</a>
+            </li>
 {% else %}
     <li>
         <a href="/login">Login</a>
@@ -75,7 +58,5 @@
     </div>
 </nav>
 {% block content %} {% endblock %}
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

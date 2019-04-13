@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Images{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+<h4>Result</h4>
+<li>
+    <p><img src="data:;base64,{{ single_image }}" style="width:400px;height:400px;"></p>
+
+    Objects in the image:
+    <br>
+    {% for object in list_objects %}
+    <form  action="/viewsecondobject/" method="POST" id = "form-input" enctype="multipart/form-data">
+    <input type = "hidden" name = "object" id = "object" value = "{{ object }}" >
+        <input type = "hidden" name = "list_objects_string" id = "list_objects_string" value = "{{ list_objects_string }}" >
+        <input type = "hidden" name = "image_name" id = "image_name" value = "{{ image_name }}" >
+        <br>
+    <button type = "submit" class="btn btn-primary" image_name = "{{ image_name}}"
+            name = "{{ object }}"  >{{ object }}</button>
+    </form>
+    {% endfor %}
+
+</li>
+
+</body>
+
+{% endblock %}

@@ -22,6 +22,12 @@ import numpy as np
 import random
 app = Flask(__name__, static_folder = "static")
 
+#import logging library to create logger file 'errorlog.txt' to log messages for the application
+from logging import FileHandler, DEBUG
+file_handler = FileHandler('errorlog.txt')
+file_handler.setLevel(DEBUG)
+app.logger.addHandler(file_handler)
+
 app.config['SESSION_TYPE'] = 'memcached'
 app.config['SECRET_KEY'] = 'super secret key'
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -59,10 +65,10 @@ def logout():
 #using wtforms to build the registration form validate input data
 class RegistrationForm(Form):
     username = TextField('Username',[validators.Length(min=4,max=20), validators.DataRequired()])
-    email = TextField('Email address',[validators.Length(min=6,max=50),validators.DataRequired()])
+    email = TextField('Email address',[validators.DataRequired()])
     firstname = TextField('First name', [validators.Length(min=2, max=50),validators.DataRequired()])
     lastname = TextField('Last name', [validators.Length(min=2, max=50),validators.DataRequired()])
-    password = PasswordField('Password', [validators.DataRequired()])
+    password = PasswordField('Password', [validators.Length(min=6,max=50),validators.DataRequired()])
 
     
 #register function
@@ -399,6 +405,7 @@ def find_image_result():
         return render_template('findImageResultNotFound.html',objectname_list = objectname_list, objects_string = objects_string,  objectlist = result_list, objectname = objectname)
     else:
         return render_template('findImageResult.html',objects_string  = objects_string, objectlist = result_list, objectname = objectname, image_list = image_list)
+
 
 
 if __name__ == "__main__":

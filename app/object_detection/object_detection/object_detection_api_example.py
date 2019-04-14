@@ -229,7 +229,7 @@ def detect_image_draw(image,filename):
       line_thickness=8)
   plt.figure(figsize=IMAGE_SIZE)
   plt.imshow(image_np)
-  output_dir = 'C:/Users/chuon/application1/env/app/images/'
+  output_dir = PHOTOS_FOLDER
   #save the image into local host
   plt.savefig(output_dir + filename)
 
@@ -255,7 +255,7 @@ def detect_image_draw_one_object(image,objectName,filename):
       line_thickness=8)
   plt.figure(figsize=IMAGE_SIZE)
   plt.imshow(image_np)
-  output_dir = 'C:/Users/chuon/application1/env/app/images/'
+  output_dir = PHOTOS_FOLDER
   filename = objectName + "_" + filename
   #save the image into local host
   plt.savefig(output_dir + filename)
@@ -279,7 +279,6 @@ def get_frame():
 # then display the frame by frame to create the video
 def detect_video():
     ret = True
-    #cap = cv2.VideoCapture(0)
     while(ret):
         cap = cv2.VideoCapture(0)
         ret,image_np = cap.read()
@@ -289,7 +288,6 @@ def detect_video():
                                                            instance_masks=output_dict.get('detection_masks'),
                                                            use_normalized_coordinates=True,line_thickness=8)
         ret,jpeg = cv2.imencode('.jpg',image_np)
-        #frame = get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -340,11 +338,9 @@ def search_video(objectname):
                     cv2.imwrite(output_dir + file_name + '.jpg',image_np)
                     with open(os.path.join(PHOTOS_FOLDER,file_name + '.jpg'),'rb') as f:
                         data= f.read()
-                    #objects = ','.join(map(str,classes_name))
                     DAO.insert_video_capture(file_name,data,objectname,current_time.strftime("%H-%M-%S"))
                 start_time =  datetime.datetime.now()
                   
-        #frame = get_frame()
         ret,jpeg = cv2.imencode('.jpg',image_np)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
